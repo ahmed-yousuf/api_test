@@ -12,5 +12,4 @@ Route::get('/user', function (Request $request) {
 
 Route::get('/vin-log', [VinLogController::class, 'getVinResponse']);
 Route::get('/vin-log-db', [VinLogController::class, 'getVinResponseTwo']);
-
 Route::get('/all-log', [VinLogController::class, 'showLastTenItems']);

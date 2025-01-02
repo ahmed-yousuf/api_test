@@ -37,7 +37,7 @@ class VinLogController extends Controller
         $vin = $request->get('vin');
 
         // Query the database using DB::table
-        $log = DB::table('vin_logs')->where('vin', $vin)->first();
+        $log = DB::table('vin_logs')->whereIn('vin', $vin)->get();
 
         if ($log) {
             // Decode the response JSON from the database
@@ -82,5 +82,4 @@ class VinLogController extends Controller
         // Return the response as JSON
         return response()->json($lastTenLogs, 200);
     }
-
 }
