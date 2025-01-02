@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('vin_logs', function (Blueprint $table) {
             $table->id();
-            $table->string('vin',17);
+            $table->string('vin', 17)->index();
             $table->json('response');
             $table->timestamps();
         });
