@@ -29,6 +29,23 @@ class VinLogController extends Controller
         ], 404);
     }
 
+    public function getVinLogCount()
+    {
+        // Fetch the count of VIN logs from the database
+        $vinLogCount = VinLog::count();
+
+        // Return the count in a JSON response
+        return response()->json([
+            'code' => 'ct-200',
+            'message' => 'VIN log count fetched successfully',
+            'success' => true,
+            'data' => [
+                'vin_log_count' => $vinLogCount,
+            ],
+        ], 200);
+    }
+
+
     public function getVinResponseTwo(Request $request)
     {
         ini_set('max_execution_time', 10000);

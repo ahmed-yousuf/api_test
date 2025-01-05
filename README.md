@@ -1,67 +1,207 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+Step 1: Create Laravel Project
+```bash
+laravel new vin_logs_project
+cd vin_logs_project
+```
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Step 2: Set Up Database Configuration
+Update your `.env` file with the database credentials:
+```env
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=vin_logs
+DB_USERNAME=root
+DB_PASSWORD=your_password
+```
 
-## About Laravel
+Step 3: Create Migration for `vin_logs` Table
+Run the following command to create a migration:
+```bash
+php artisan make:migration create_vin_logs_table
+```
+Edit the migration file in `database/migrations`:
+```php
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+class CreateVinLogsTable extends Migration
+{
+    public function up()
+    {
+        Schema::create('vin_logs', function (Blueprint $table) {
+            $table->id();
+            $table->string('vin', 17);
+            $table->json('response');
+            $table->timestamps();
+        });
+    }
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+    public function down()
+    {
+        Schema::dropIfExists('vin_logs');
+    }
+}
+```
+Run the migration:
+```bash
+php artisan migrate
+```
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+Step 4: Create Model and Factory
+Run the following command to generate a model and factory:
+```bash
+php artisan make:model VinLog -mf
+```
+Edit the factory in `database/factories/VinLogFactory.php`:
+```php
+use App\Models\VinLog;
+use Illuminate\Database\Eloquent\Factories\Factory;
 
-## Learning Laravel
+class VinLogFactory extends Factory
+{
+    protected $model = VinLog::class;
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+    public function definition()
+    {
+        return [
+            'vin' => strtoupper($this->faker->bothify('??#?#?#?#?#?#?#?#?#?#')), // Random VIN-like string
+            'response' => json_encode([
+                'code' => 'ct-200',
+                'message' => 'ok',
+                'success' => true,
+                'response' => [
+                    'id' => $this->faker->randomNumber(8),
+                    'ref' => 'VPE-' . $this->faker->randomNumber(8),
+                    'date' => now()->format('d/m/Y'),
+                    'trim' => '1.8L Full',
+                    'year' => $this->faker->year(),
+                    'model' => 'Corolla',
+                    'lower_limit' => $this->faker->numberBetween(20000, 25000),
+                    'upper_limit' => $this->faker->numberBetween(25001, 30000),
+                    'manufacturer' => 'Toyota',
+                    'specifications' => [
+                        'axel' => '2',
+                        'drive' => 'FWD',
+                        'liter' => '1.8',
+                        'width' => '1760',
+                        'height' => '1460',
+                        'length' => '4540',
+                        'weight' => '1450',
+                        'body_type' => 'Sedan',
+                        'fuel_type' => null,
+                        'top_speed' => '195',
+                        'wheelbase' => '2600',
+                        'engine_type' => 'Gasoline',
+                        'acceleration' => '11',
+                        'engine_power' => '134',
+                        'gearbox_type' => 'Automatic',
+                        'power_torque' => '175',
+                        'vehicle_type' => 'Car',
+                        'fuel_capacity' => '50',
+                        'engine_turbine' => null,
+                        'trunk_capacity' => '348',
+                        'engine_cylinder' => '4 Cylinders',
+                        'number_of_doors' => 4,
+                        'number_of_gears' => null,
+                        'fuel_consumption' => '15',
+                        'number_of_passengers' => '5',
+                    ],
+                    'evaluated_price' => $this->faker->numberBetween(20000, 30000),
+                    'safety_features' => [
+                        'airbags' => 'yes',
+                        'seatbelt' => 'yes',
+                        'parking_sensors' => 'yes',
+                        'anti_lock_brakes' => 'yes',
+                        'heads_up_display' => 'no',
+                        'rear_view_camera' => 'yes',
+                        'traction_control' => 'no',
+                        'anti_theft_device' => 'yes',
+                        'driver_monitoring' => 'no',
+                        'blind_spot_warning' => 'no',
+                        'adaptive_headlights' => 'no',
+                        'lane_keeping_assist' => 'no',
+                        'pedestrian_detection' => 'no',
+                        'tire_pressure_monitor' => 'no',
+                        'daytime_running_lights' => 'no',
+                        'dynamic_turning_lights' => 'no',
+                        'lane_departure_warning' => 'no',
+                        'adaptive_cruise_control' => 'no',
+                        'forward_collision_warning' => 'no',
+                        'electronic_stability_control' => 'yes',
+                    ],
+                    'reliability_index_score' => '95',
+                ],
+            ]),
+        ];
+    }
+}
+```
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+Step 5: Create Seeder
+Run the following command:
+```bash
+php artisan make:seeder VinLogSeeder
+```
+Edit the seeder in `database/seeders/VinLogSeeder.php`:
+```php
+use Illuminate\Database\Seeder;
+use App\Models\VinLog;
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+class VinLogSeeder extends Seeder
+{
+    public function run()
+    {
+        VinLog::factory()->count(1000)->create();
+    }
+}
+```
+Run the seeder:
+```bash
+php artisan db:seed --class=VinLogSeeder
+```
 
-## Laravel Sponsors
+Step 6: Create API Endpoint
+Run the following command to create a controller:
+```bash
+php artisan make:controller Api/VinLogController
+```
+Edit `VinLogController`:
+```php
+use App\Models\VinLog;
+use Illuminate\Http\Request;
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+class VinLogController extends Controller
+{
+    public function getVinResponse(Request $request)
+    {
+        $vin = $request->get('vin');
 
-### Premium Partners
+        $log = VinLog::where('vin', $vin)->first();
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
+        if ($log) {
+            return response()->json(json_decode($log->response), 200);
+        }
 
-## Contributing
+        return response()->json([
+            'code' => 'ct-404',
+            'message' => 'VIN not found',
+            'success' => false,
+        ], 404);
+    }
+}
+```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+Step 7: Define Route
+In `routes/api.php`:
+```php
+use App\Http\Controllers\Api\VinLogController;
 
-## Code of Conduct
+Route::get('/vin-log', [VinLogController::class, 'getVinResponse']);
+```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
-
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
-
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
-# api_test
+Step 8: Test API
+Use tools like Postman to test the endpoint by passing a `vin` query parameter:
+```bash
+GET http://your-laravel-app.test/api/vin-log?vin=RANDOMVIN123456789
