@@ -13,6 +13,6 @@ class VinLogSeeder extends Seeder
      */
     public function run(): void
     {
-        VinLog::factory()->count(10000)->create();
+        VinLog::factory()->count(1000)->create();
     }
 }

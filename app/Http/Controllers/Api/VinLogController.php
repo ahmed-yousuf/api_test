@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\LogApi;
 use App\Models\VinLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -11,22 +12,46 @@ class VinLogController extends Controller
 {
     public function getVinResponse(Request $request)
     {
+        // Start measuring execution time
+        $startTime = microtime(true);
 
         ini_set('max_execution_time', 10000);
         ini_set('memory_limit', '-1');
+
+
         $vin = $request->get('vin');
+
+        $clientIp = $request->ip();
+        $userAgent = $request->header('User-Agent');
 
         $log = VinLog::where('vin', $vin)->first();
 
         if ($log) {
-            return response()->json(json_decode($log->response), 200);
-        }
 
-        return response()->json([
-            'code' => 'ct-404',
-            'message' => 'VIN not found',
-            'success' => false,
-        ], 404);
+            // return response()->json(json_decode($log->response), 200);
+            $response = json_decode($log->response);
+            $statusCode = 200;
+        } else {
+            $response = [
+                'code' => 'ct-404',
+                'message' => 'VIN not found',
+                'success' => false,
+            ];
+            $statusCode = 404;
+        }
+        $endTime = microtime(true);
+        $executionTime = round(($endTime - $startTime) * 1000, 2);
+
+        // Save the log in the database
+        LogApi::create([
+            'vin' => $vin,
+            'ip_address' => $clientIp,
+            'user_agent' => $userAgent,
+            'status_code' => $statusCode,
+            'response_time_ms' => $executionTime,
+        ]);
+
+        return response()->json($response, $statusCode);
     }
 
     public function getVinLogCount()
